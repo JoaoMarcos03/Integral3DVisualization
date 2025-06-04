@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<meta charset="UTF-8"/>
+		<title>Visualizador de Integrais</title>
+		<link rel="stylesheet" href="src/styles/main.css">
+		<!-- Carregar Three.js do CDN -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+	</head>
+	<body>
+		<div id="app">
+			<h1>Visualizador de Integrais</h1>
+			<div id="form-container"></div>
+			<div id="result-container">
+				<div id="numerical-result"></div>
+				<div id="visualization"></div>
+			</div>
+		</div>
+		
+		 <!-- Nossos scripts -->
+		<script src="src/js/utils.js"></script>
+		<script src="src/js/mathEngine.js"></script>
+		<script src="src/components/renderer.js"></script>
+		<script src="src/js/visualization.js"></script>
+		<script src="src/components/controls.js"></script>
+		<script src="src/components/inputForm.js"></script>
+		<script src="src/js/uiController.js"></script>
+		<script src="src/index.js"></script>
+	</body>
+</html>
