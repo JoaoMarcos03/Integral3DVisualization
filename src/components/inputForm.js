@@ -1,75 +1,74 @@
 class InputForm {
     constructor(onSubmit) {
         this.onSubmit = onSubmit;
-        this.dimension = 3; // Default to 3D (triple integral)
+        this.dimension = 3; // Por defeito 3D (integral triplo)
         this.createForm();
     }
 
     createForm() {
-        // Create the form container
+        // Cria o contentor do formulário
         const formContainer = document.getElementById('form-container');
         formContainer.innerHTML = '';
         
         this.form = document.createElement('form');
         this.form.classList.add('integral-form');
         
-        // Add dimension selector
+        // Adiciona seletor de dimensão
         const dimensionDiv = document.createElement('div');
         dimensionDiv.classList.add('form-group');
         dimensionDiv.innerHTML = `
-            <label>Integration Dimension:</label>
+            <label>Dimensão da Integração:</label>
             <select id="dimension-select">
-                <option value="1">Single Integral (1D)</option>
-                <option value="2">Double Integral (2D)</option>
-                <option value="3" selected>Triple Integral (3D)</option>
+                <option value="1">Integral Simples (1D)</option>
+                <option value="2">Integral Duplo (2D)</option>
+                <option value="3" selected>Integral Triplo (3D)</option>
             </select>
         `;
         this.form.appendChild(dimensionDiv);
         
-        // Add function input
+        // Adiciona campo da função
         const functionDiv = document.createElement('div');
         functionDiv.classList.add('form-group');
         functionDiv.innerHTML = `
-            <label for="function">Function:</label>
-            <input type="text" id="function" name="function" placeholder="e.g., x*y*z or Math.sin(x)" required>
-            <small>Use x, y, z as variables. Math functions available (Math.sin, Math.exp, etc)</small>
+            <label for="function">Função a Integrar:</label>
+            <input type="text" id="function" name="function" placeholder="ex: x*y*z ou Math.sin(x)" required>
+            <small>Use x, y, z como variáveis. Funções Math disponíveis (Math.sin, Math.exp, etc.)</small>
         `;
         this.form.appendChild(functionDiv);
         
-        // Add limits containers
+        // Adiciona contentores de limites
         this.limitsContainer = document.createElement('div');
         this.limitsContainer.id = 'limits-container';
         this.form.appendChild(this.limitsContainer);
         
-        // Add the visualization options
+        // Adiciona opções de visualização
         const visualDiv = document.createElement('div');
         visualDiv.classList.add('form-group');
         visualDiv.innerHTML = `
-            <label>Visualization Options:</label>
+            <label>Opções de Visualização:</label>
             <div class="visual-options">
                 <label>
                     <input type="checkbox" id="show-bounds" checked>
-                    Show Boundaries
+                    Mostrar Limites de Integração
                 </label>
                 <label>
                     <input type="checkbox" id="show-points" checked>
-                    Show Sample Points
+                    Mostrar Pontos de Amostra
                 </label>
                 <label>
-                    <input type="number" id="resolution" value="10" min="5" max="50">
-                    Resolution
+                    Resolução: <input type="number" id="resolution" value="10" min="5" max="50">
                 </label>
             </div>
         `;
         this.form.appendChild(visualDiv);
         
-        // Add submit button
+        // Adiciona botão de submissão
         const submitBtn = document.createElement('button');
         submitBtn.type = 'submit';
-        submitBtn.textContent = 'Calculate & Visualize';
+        submitBtn.textContent = 'Calcular e Visualizar Integral';
         this.form.appendChild(submitBtn);
         
-        // Add event listeners
+        // Adiciona ouvintes de eventos
         this.form.addEventListener('submit', this.handleSubmit.bind(this));
         const dimensionSelect = this.form.querySelector('#dimension-select');
         dimensionSelect.addEventListener('change', (e) => {
@@ -77,26 +76,26 @@ class InputForm {
             this.updateLimitsInputs();
         });
         
-        // Initial setup of limits inputs
+        // Configuração inicial dos campos de limites
         this.updateLimitsInputs();
         
-        // Add form to container
+        // Adiciona formulário ao contentor
         formContainer.appendChild(this.form);
     }
     
     updateLimitsInputs() {
-        // Clear current limits
+        // Limpa limites atuais
         this.limitsContainer.innerHTML = '';
         
         if (this.dimension >= 1) {
-            // X limits
+            // Limites de X
             const xLimitsDiv = document.createElement('div');
             xLimitsDiv.classList.add('limits-group');
             xLimitsDiv.innerHTML = `
-                <label>X Limits:</label>
+                <label>Limites de Integração para X:</label>
                 <div class="limits-inputs">
                     <input type="number" id="xMin" name="xMin" value="-1" step="0.1" required>
-                    <span>to</span>
+                    <span>até</span>
                     <input type="number" id="xMax" name="xMax" value="1" step="0.1" required>
                 </div>
             `;
@@ -104,14 +103,14 @@ class InputForm {
         }
         
         if (this.dimension >= 2) {
-            // Y limits
+            // Limites de Y
             const yLimitsDiv = document.createElement('div');
             yLimitsDiv.classList.add('limits-group');
             yLimitsDiv.innerHTML = `
-                <label>Y Limits:</label>
+                <label>Limites de Integração para Y:</label>
                 <div class="limits-inputs">
                     <input type="number" id="yMin" name="yMin" value="-1" step="0.1" required>
-                    <span>to</span>
+                    <span>até</span>
                     <input type="number" id="yMax" name="yMax" value="1" step="0.1" required>
                 </div>
             `;
@@ -119,14 +118,14 @@ class InputForm {
         }
         
         if (this.dimension >= 3) {
-            // Z limits
+            // Limites de Z
             const zLimitsDiv = document.createElement('div');
             zLimitsDiv.classList.add('limits-group');
             zLimitsDiv.innerHTML = `
-                <label>Z Limits:</label>
+                <label>Limites de Integração para Z:</label>
                 <div class="limits-inputs">
                     <input type="number" id="zMin" name="zMin" value="-1" step="0.1" required>
-                    <span>to</span>
+                    <span>até</span>
                     <input type="number" id="zMax" name="zMax" value="1" step="0.1" required>
                 </div>
             `;
@@ -137,10 +136,10 @@ class InputForm {
     handleSubmit(event) {
         event.preventDefault();
         
-        // Get form values
+        // Obtém valores do formulário
         const functionText = this.form.querySelector('#function').value;
         
-        // Get limits based on dimension
+        // Obtém limites baseados na dimensão
         const limits = {};
         
         if (this.dimension >= 1) {
@@ -164,14 +163,14 @@ class InputForm {
             ];
         }
         
-        // Get visualization options
+        // Obtém opções de visualização
         const visualization = {
             showBounds: this.form.querySelector('#show-bounds').checked,
             showPoints: this.form.querySelector('#show-points').checked,
             resolution: parseInt(this.form.querySelector('#resolution').value)
         };
         
-        // Call the onSubmit callback
+        // Chama a função de retorno onSubmit
         if (this.onSubmit) {
             this.onSubmit({
                 function: functionText,

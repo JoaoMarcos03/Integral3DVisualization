@@ -1,41 +1,44 @@
-// Using the global THREE object directly
+// Controlador da interface do utilizador
 class UIController {
     constructor() {
         this.mathEngine = new MathEngine();
         this.visualization = new Visualization();
         this.inputForm = new InputForm(this.handleFormSubmit.bind(this));
         
-        // Create result display
+        // Cria o elemento de apresentação de resultados
         this.resultElement = document.getElementById('numerical-result');
         if (!this.resultElement) {
             this.resultElement = document.createElement('div');
             this.resultElement.id = 'numerical-result';
             document.getElementById('result-container').prepend(this.resultElement);
         }
+        
+        // Esconde o elemento de resultado por defeito
+        this.resultElement.style.display = 'none';
     }
     
     handleFormSubmit(data) {
         const { function: funcText, dimension, limits, visualization: visualOptions } = data;
         
-        // Set the function in the math engine
+        // Define a função no motor matemático
         const success = this.mathEngine.setFunction(funcText);
         if (!success) {
-            this.showError('Invalid function expression');
+            this.showError('Expressão de função inválida');
             return;
         }
         
         try {
-            // Calculate the numerical result
-            const steps = visualOptions.resolution * 5; // Use higher resolution for calculation
+            // Calcula o resultado numérico
+            const steps = visualOptions.resolution * 5; // Usa resolução mais elevada para cálculo
             const result = this.mathEngine.computeIntegral(dimension, limits, steps);
             
-            // Display the result
+            // Apresenta o resultado
             this.displayResult(funcText, dimension, limits, result);
             
-            // Generate points for visualization
+            // Gera pontos para visualização
             const points = this.mathEngine.generateSamplePoints(dimension, limits, visualOptions.resolution);
             
-            // Update visualization
+            // Atualiza visualização
             this.visualization.updateVisualization({
                 points,
                 dimension,
@@ -43,8 +46,8 @@ class UIController {
                 showBounds: visualOptions.showBounds
             });
         } catch (error) {
-            console.error('Calculation error:', error);
-            this.showError(`Error calculating integral: ${error.message}`);
+            console.error('Erro de cálculo:', error);
+            this.showError(`Erro ao calcular integral: ${error.message}`);
         }
     }
     
@@ -64,32 +67,33 @@ class UIController {
         }
         
         const dimensionSymbol = dimension === 1 ? '∫' : (dimension === 2 ? '∬' : '∭');
+        const integralType = dimension === 1 ? 'dx' : (dimension === 2 ? 'dA' : 'dV');
         
         this.resultElement.innerHTML = `
             <div class="result-card">
-                <h3>Integral Result</h3>
+                <h3>Resultado do Integral</h3>
                 <div class="math-expression">
-                    ${dimensionSymbol} ${funcText} ${dimension > 1 ? 'd' + (dimension === 3 ? 'V' : 'A') : 'dx'} = <strong>${result.toFixed(6)}</strong>
+                    ${dimensionSymbol} ${funcText} ${integralType} = <strong>${result.toFixed(6)}</strong>
                 </div>
                 <div class="limits">
-                    where ${limitText}
+                    onde ${limitText}
                 </div>
             </div>
         `;
         
-        // Make sure the result is visible
+        // Garante que o resultado está visível
         this.resultElement.style.display = 'block';
     }
     
     showError(message) {
         this.resultElement.innerHTML = `
             <div class="error-card">
-                <h3>Error</h3>
+                <h3>Erro</h3>
                 <p>${message}</p>
             </div>
         `;
         
-        // Make sure the error is visible
+        // Garante que o erro está visível
         this.resultElement.style.display = 'block';
     }
 }

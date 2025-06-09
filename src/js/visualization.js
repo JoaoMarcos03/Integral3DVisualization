@@ -1,24 +1,28 @@
+// Classe de visualização 3D
 class Visualization {
     constructor() {
         this.container = document.getElementById('visualization');
-        this.width = this.container.clientWidth || 600;
-        this.height = this.container.clientHeight || 400;
         this.scene = null;
         this.camera = null;
         this.renderer = null;
         this.controls = null;
         this.points = [];
         this.boundingBox = null;
+        this.animationId = null;
         
-        this.init();
+        // Aguarda que o contentor tenha o tamanho apropriado
+        setTimeout(() => this.init(), 100);
     }
 
     init() {
-        // Create scene
+        // Obtém dimensões do contentor após o layout estar completo
+        this.updateDimensions();
+        
+        // Cria cena
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0xf0f0f0);
         
-        // Create camera
+        // Cria câmera
         this.camera = new THREE.PerspectiveCamera(
             60, 
             this.width / this.height,
@@ -28,18 +32,24 @@ class Visualization {
         this.camera.position.set(5, 5, 5);
         this.camera.lookAt(0, 0, 0);
         
-        // Create renderer
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        // Cria renderizador
+        this.renderer = new THREE.WebGLRenderer({ 
+            antialias: true,
+            alpha: true 
+        });
         this.renderer.setSize(this.width, this.height);
+        this.renderer.setPixelRatio(window.devicePixelRatio);
+        
+        // Limpa contentor e adiciona renderizador
         this.container.innerHTML = '';
         this.container.appendChild(this.renderer.domElement);
         
-        // Add controls
+        // Adiciona controlos
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         
-        // Add basic lighting
+        // Adiciona iluminação básica
         const ambientLight = new THREE.AmbientLight(0x404040, 1.5);
         this.scene.add(ambientLight);
         
@@ -47,18 +57,24 @@ class Visualization {
         directionalLight.position.set(1, 1, 1);
         this.scene.add(directionalLight);
         
-        // Add coordinate axes
+        // Adiciona eixos coordenados
         this.addAxes();
         
-        // Handle window resize
+        // Trata redimensionamento da janela
         window.addEventListener('resize', this.onWindowResize.bind(this));
         
-        // Start animation loop
+        // Inicia ciclo de animação
         this.animate();
     }
     
+    updateDimensions() {
+        const rect = this.container.getBoundingClientRect();
+        this.width = Math.max(rect.width, 400);
+        this.height = Math.max(rect.height, 300);
+    }
+    
     addAxes() {
-        // X axis - red
+        // Eixo X - vermelho
         const xAxis = new THREE.ArrowHelper(
             new THREE.Vector3(1, 0, 0),
             new THREE.Vector3(0, 0, 0),
@@ -67,7 +83,7 @@ class Visualization {
         );
         this.scene.add(xAxis);
         
-        // Y axis - green
+        // Eixo Y - verde
         const yAxis = new THREE.ArrowHelper(
             new THREE.Vector3(0, 1, 0),
             new THREE.Vector3(0, 0, 0),
@@ -76,7 +92,7 @@ class Visualization {
         );
         this.scene.add(yAxis);
         
-        // Z axis - blue
+        // Eixo Z - azul
         const zAxis = new THREE.ArrowHelper(
             new THREE.Vector3(0, 0, 1),
             new THREE.Vector3(0, 0, 0),
@@ -85,7 +101,7 @@ class Visualization {
         );
         this.scene.add(zAxis);
         
-        // Add labels
+        // Adiciona rótulos
         const addLabel = (text, position, color) => {
             const canvas = document.createElement('canvas');
             canvas.width = 64;
@@ -115,27 +131,27 @@ class Visualization {
     }
     
     onWindowResize() {
-        this.width = this.container.clientWidth;
-        this.height = this.container.clientHeight;
+        this.updateDimensions();
         
-        this.camera.aspect = this.width / this.height;
-        this.camera.updateProjectionMatrix();
-        
-        this.renderer.setSize(this.width, this.height);
+        if (this.camera && this.renderer) {
+            this.camera.aspect = this.width / this.height;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(this.width, this.height);
+        }
     }
     
     animate() {
-        requestAnimationFrame(this.animate.bind(this));
-        this.controls.update();
-        this.renderer.render(this.scene, this.camera);
+        this.animationId = requestAnimationFrame(this.animate.bind(this));
+        if (this.controls) this.controls.update();
+        if (this.renderer) this.renderer.render(this.scene, this.camera);
     }
     
     clearVisualization() {
-        // Remove all objects except axes
+        // Remove todos os objetos exceto eixos
         for (let i = this.scene.children.length - 1; i >= 0; i--) {
             const obj = this.scene.children[i];
             if (!(obj instanceof THREE.ArrowHelper) && !(obj instanceof THREE.AmbientLight) && 
-                !(obj instanceof THREE.DirectionalLight)) {
+                !(obj instanceof THREE.DirectionalLight) && !(obj instanceof THREE.Sprite)) {
                 this.scene.remove(obj);
             }
         }
@@ -173,10 +189,10 @@ class Visualization {
     }
     
     visualize1D(points) {
-        // Create a line for 1D function
+        // Cria uma linha para função 1D
         const lineGeometry = new THREE.BufferGeometry();
         
-        // Extract vertices
+        // Extrai vértices
         const vertices = points.map(p => new THREE.Vector3(p.x, p.y, p.z));
         lineGeometry.setFromPoints(vertices);
         
@@ -184,7 +200,7 @@ class Visualization {
         const line = new THREE.Line(lineGeometry, lineMaterial);
         this.scene.add(line);
         
-        // Add points
+        // Adiciona pontos
         const pointGeometry = new THREE.BufferGeometry();
         const positions = new Float32Array(points.length * 3);
         
@@ -201,20 +217,20 @@ class Visualization {
     }
     
     visualize2D(points) {
-        // Create surfaces for 2D function
+        // Cria superfícies para função 2D
         const xCount = Math.sqrt(points.length);
         const yCount = xCount;
         
-        // Create a parametric surface
+        // Cria uma superfície paramétrica
         const geometry = new THREE.PlaneGeometry(2, 2, xCount - 1, yCount - 1);
         const vertices = geometry.attributes.position.array;
         
-        // Map vertices to function values
+        // Mapeia vértices aos valores da função
         for (let i = 0, j = 0; i < vertices.length; i += 3, j++) {
             const x = vertices[i];
             const y = vertices[i + 1];
             
-            // Find the corresponding point
+            // Encontra o ponto correspondente
             const xIndex = Math.floor((x + 1) / 2 * (xCount - 1));
             const yIndex = Math.floor((y + 1) / 2 * (yCount - 1));
             const index = yIndex * xCount + xIndex;
@@ -224,10 +240,10 @@ class Visualization {
             }
         }
         
-        // Update geometry
+        // Atualiza geometria
         geometry.computeVertexNormals();
         
-        // Create surface material
+        // Cria material da superfície
         const material = new THREE.MeshPhongMaterial({
             color: 0x156289,
             side: THREE.DoubleSide,
@@ -239,7 +255,7 @@ class Visualization {
         const surface = new THREE.Mesh(geometry, material);
         this.scene.add(surface);
         
-        // Add wireframe
+        // Adiciona estrutura aramada
         const wireframeMaterial = new THREE.MeshBasicMaterial({
             color: 0x000000,
             wireframe: true,
@@ -252,7 +268,7 @@ class Visualization {
     }
     
     visualize3D(points) {
-        // For 3D, use colored points with sizes based on function value
+        // Para 3D, usa pontos coloridos com tamanhos baseados no valor da função
         const geometry = new THREE.BufferGeometry();
         const positions = new Float32Array(points.length * 3);
         const colors = new Float32Array(points.length * 3);
@@ -260,7 +276,7 @@ class Visualization {
         
         const color = new THREE.Color();
         
-        // Find min/max values for normalization
+        // Encontra valores mínimo/máximo para normalização
         let minValue = Infinity;
         let maxValue = -Infinity;
         
@@ -270,21 +286,21 @@ class Visualization {
         }
         
         for (let i = 0; i < points.length; i++) {
-            // Position
+            // Posição
             positions[i * 3] = points[i].x;
             positions[i * 3 + 1] = points[i].y;
             positions[i * 3 + 2] = points[i].z;
             
-            // Normalize value between 0 and 1
+            // Normaliza valor entre 0 e 1
             const normalizedValue = (points[i].value - minValue) / (maxValue - minValue || 1);
             
-            // Color - from blue (0) to red (1)
+            // Cor - de azul (0) a vermelho (1)
             color.setHSL(0.7 * (1 - normalizedValue), 1, 0.5);
             colors[i * 3] = color.r;
             colors[i * 3 + 1] = color.g;
             colors[i * 3 + 2] = color.b;
             
-            // Size based on value (scaled between 0.05 and 0.2)
+            // Tamanho baseado no valor (escalado entre 0.05 e 0.2)
             sizes[i] = 0.05 + normalizedValue * 0.15;
         }
         
@@ -312,20 +328,20 @@ class Visualization {
         }
         
         if (points && points.length > 0) {
-            // Choose visualization based on dimension
+            // Escolhe visualização baseada na dimensão
             if (dimension === 1) {
                 this.visualize1D(points);
-                // Adjust camera for 1D visualization
+                // Ajusta câmera para visualização 1D
                 this.camera.position.set(0, 3, 3);
                 this.controls.target.set((limits.x[0] + limits.x[1]) / 2, 0, 0);
             } else if (dimension === 2) {
                 this.visualize2D(points);
-                // Adjust camera for 2D visualization
+                // Ajusta câmera para visualização 2D
                 this.camera.position.set(0, 0, 5);
                 this.controls.target.set(0, 0, 0);
             } else if (dimension === 3) {
                 this.visualize3D(points);
-                // Adjust camera for 3D visualization
+                // Ajusta câmera para visualização 3D
                 this.camera.position.set(3, 3, 3);
                 this.controls.target.set(0, 0, 0);
             }
@@ -333,5 +349,15 @@ class Visualization {
             this.camera.lookAt(this.controls.target);
             this.controls.update();
         }
+    }
+    
+    destroy() {
+        if (this.animationId) {
+            cancelAnimationFrame(this.animationId);
+        }
+        if (this.renderer) {
+            this.renderer.dispose();
+        }
+        window.removeEventListener('resize', this.onWindowResize.bind(this));
     }
 }

@@ -1,4 +1,4 @@
-// Using the global THREE object directly
+// Motor de cálculo matemático para integrais
 class MathEngine {
     constructor() {
         this.functionString = '';
@@ -8,43 +8,43 @@ class MathEngine {
     setFunction(funcStr) {
         this.functionString = funcStr;
         try {
-            // Create a function that can evaluate the expression
+            // Cria uma função que pode avaliar a expressão
             this.parsedFunction = this.parseFunction(funcStr);
             return true;
         } catch (error) {
-            console.error("Error parsing function:", error);
+            console.error("Erro ao analisar função:", error);
             return false;
         }
     }
 
     parseFunction(funcStr) {
-        // Create a safe function from the string
-        // We wrap it in a try-catch to handle potential invalid expressions
+        // Cria uma função segura a partir da string
+        // Envolvemos numa estrutura try-catch para tratar expressões inválidas
         try {
             return new Function('x', 'y', 'z', `
                 try {
                     const Math = window.Math;
                     return ${funcStr};
                 } catch (e) {
-                    console.error('Error evaluating function:', e);
+                    console.error('Erro ao avaliar função:', e);
                     return 0;
                 }
             `);
         } catch (e) {
-            throw new Error(`Invalid function: ${e.message}`);
+            throw new Error(`Função inválida: ${e.message}`);
         }
     }
 
-    // Single integral computation
+    // Cálculo de integral simples
     computeSingleIntegral(xMin, xMax, steps = 100) {
         if (!this.parsedFunction) {
-            throw new Error("Function not set");
+            throw new Error("Função não definida");
         }
         
         let total = 0;
         const dx = (xMax - xMin) / steps;
         
-        // Trapezoidal rule for better approximation
+        // Regra dos trapézios para melhor aproximação
         let prev = this.parsedFunction(xMin, 0, 0);
         
         for (let i = 1; i <= steps; i++) {
@@ -57,10 +57,10 @@ class MathEngine {
         return total;
     }
 
-    // Double integral computation
+    // Cálculo de integral duplo
     computeDoubleIntegral(xMin, xMax, yMin, yMax, steps = 30) {
         if (!this.parsedFunction) {
-            throw new Error("Function not set");
+            throw new Error("Função não definida");
         }
         
         let total = 0;
@@ -68,10 +68,10 @@ class MathEngine {
         const dy = (yMax - yMin) / steps;
         
         for (let i = 0; i < steps; i++) {
-            const x = xMin + (i + 0.5) * dx; // Midpoint rule
+            const x = xMin + (i + 0.5) * dx; // Regra do ponto médio
             
             for (let j = 0; j < steps; j++) {
-                const y = yMin + (j + 0.5) * dy; // Midpoint rule
+                const y = yMin + (j + 0.5) * dy; // Regra do ponto médio
                 total += this.parsedFunction(x, y, 0) * dx * dy;
             }
         }
@@ -79,10 +79,10 @@ class MathEngine {
         return total;
     }
 
-    // Triple integral computation
+    // Cálculo de integral triplo
     computeTripleIntegral(xMin, xMax, yMin, yMax, zMin, zMax, steps = 20) {
         if (!this.parsedFunction) {
-            throw new Error("Function not set");
+            throw new Error("Função não definida");
         }
         
         let total = 0;
@@ -91,13 +91,13 @@ class MathEngine {
         const dz = (zMax - zMin) / steps;
         
         for (let i = 0; i < steps; i++) {
-            const x = xMin + (i + 0.5) * dx; // Midpoint rule
+            const x = xMin + (i + 0.5) * dx; // Regra do ponto médio
             
             for (let j = 0; j < steps; j++) {
-                const y = yMin + (j + 0.5) * dy; // Midpoint rule
+                const y = yMin + (j + 0.5) * dy; // Regra do ponto médio
                 
                 for (let k = 0; k < steps; k++) {
-                    const z = zMin + (k + 0.5) * dz; // Midpoint rule
+                    const z = zMin + (k + 0.5) * dz; // Regra do ponto médio
                     total += this.parsedFunction(x, y, z) * dx * dy * dz;
                 }
             }
@@ -106,7 +106,7 @@ class MathEngine {
         return total;
     }
     
-    // Compute integral based on dimension
+    // Calcula integral baseado na dimensão
     computeIntegral(dimension, limits, steps = 20) {
         if (dimension === 1) {
             return this.computeSingleIntegral(limits.x[0], limits.x[1], steps);
@@ -124,16 +124,16 @@ class MathEngine {
                 steps
             );
         } else {
-            throw new Error(`Unsupported dimension: ${dimension}`);
+            throw new Error(`Dimensão não suportada: ${dimension}`);
         }
     }
     
-    // Generate sample points for visualization
+    // Gera pontos de amostra para visualização
     generateSamplePoints(dimension, limits, resolution = 10) {
         const points = [];
         
         if (dimension === 1) {
-            // 1D: Generate points along x-axis
+            // 1D: Gera pontos ao longo do eixo x
             const xStep = (limits.x[1] - limits.x[0]) / resolution;
             for (let i = 0; i <= resolution; i++) {
                 const x = limits.x[0] + i * xStep;
@@ -146,7 +146,7 @@ class MathEngine {
                 });
             }
         } else if (dimension === 2) {
-            // 2D: Generate grid in xy-plane
+            // 2D: Gera grelha no plano xy
             const xStep = (limits.x[1] - limits.x[0]) / resolution;
             const yStep = (limits.y[1] - limits.y[0]) / resolution;
             
@@ -164,7 +164,7 @@ class MathEngine {
                 }
             }
         } else if (dimension === 3) {
-            // 3D: Generate volume
+            // 3D: Gera volume
             const xStep = (limits.x[1] - limits.x[0]) / resolution;
             const yStep = (limits.y[1] - limits.y[0]) / resolution;
             const zStep = (limits.z[1] - limits.z[0]) / resolution;
@@ -176,7 +176,7 @@ class MathEngine {
                         const y = limits.y[0] + j * yStep;
                         const z = limits.z[0] + k * zStep;
                         const value = this.parsedFunction(x, y, z);
-                        // Only add points where the function is positive (for visualization clarity)
+                        // Só adiciona pontos onde a função é positiva (para clareza visual)
                         if (value > 0) {
                             points.push({
                                 x: x,

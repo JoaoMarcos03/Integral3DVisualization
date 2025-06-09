@@ -3,15 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Create the UI Controller which will initialize all components
     const controller = new UIController();
     
-    // Start animation loop
-    function animate() {
-        requestAnimationFrame(animate);
-        controller.visualization.renderer.render(
-            controller.visualization.scene, 
-            controller.visualization.camera
-        );
-    }
-    animate();
+    // Remove the external animation loop - let Visualization handle its own animation
     
     // Add some examples to the page to help users get started
     addExamples();
@@ -22,11 +14,19 @@ function addExamples() {
     const container = document.createElement('div');
     container.id = 'examples';
     container.innerHTML = `
-        <h3>Try These Examples:</h3>
+        <h3>Experimente Estes Exemplos:</h3>
         <div class="example-buttons">
-            <button class="example-btn" data-dimension="1" data-func="Math.sin(x)" data-limits='{"x":[-3.14,3.14]}'>sin(x) from -π to π</button>
-            <button class="example-btn" data-dimension="2" data-func="x*y" data-limits='{"x":[-1,1],"y":[-1,1]}'>x*y over [-1,1]×[-1,1]</button>
-            <button class="example-btn" data-dimension="3" data-func="x*y*z" data-limits='{"x":[-1,1],"y":[-1,1],"z":[-1,1]}'>x*y*z over unit cube</button>
+            <button class="example-btn" data-dimension="1" data-func="Math.sin(x)" data-limits='{"x":[-3.14159,3.14159]}'>sin(x) de -π a π</button>
+            <button class="example-btn" data-dimension="1" data-func="Math.exp(-x*x)" data-limits='{"x":[-2,2]}'>Gaussiana e^(-x²)</button>
+            <button class="example-btn" data-dimension="1" data-func="x*x" data-limits='{"x":[0,2]}'>Parábola x²</button>
+            <button class="example-btn" data-dimension="2" data-func="x*y" data-limits='{"x":[-1,1],"y":[-1,1]}'>x×y sobre quadrado</button>
+            <button class="example-btn" data-dimension="2" data-func="Math.sin(x)*Math.cos(y)" data-limits='{"x":[0,3.14159],"y":[0,3.14159]}'>sin(x)×cos(y)</button>
+            <button class="example-btn" data-dimension="2" data-func="Math.exp(-(x*x + y*y))" data-limits='{"x":[-2,2],"y":[-2,2]}'>Gaussiana 2D</button>
+            <button class="example-btn" data-dimension="2" data-func="x*x + y*y" data-limits='{"x":[-1,1],"y":[-1,1]}'>Parabolóide x²+y²</button>
+            <button class="example-btn" data-dimension="3" data-func="x*y*z" data-limits='{"x":[-1,1],"y":[-1,1],"z":[-1,1]}'>x×y×z sobre cubo</button>
+            <button class="example-btn" data-dimension="3" data-func="(x*x + y*y + z*z <= 1) ? 1 : 0" data-limits='{"x":[-1,1],"y":[-1,1],"z":[-1,1]}'>Volume da esfera</button>
+            <button class="example-btn" data-dimension="3" data-func="Math.exp(-(x*x + y*y + z*z))" data-limits='{"x":[-2,2],"y":[-2,2],"z":[-2,2]}'>Gaussiana 3D</button>
+            <button class="example-btn" data-dimension="3" data-func="Math.sin(x)*Math.sin(y)*Math.sin(z)" data-limits='{"x":[0,3.14159],"y":[0,3.14159],"z":[0,3.14159]}'>Ondas senoidais 3D</button>
         </div>
     `;
     

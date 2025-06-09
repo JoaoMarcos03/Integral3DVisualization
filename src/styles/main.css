@@ -1,4 +1,4 @@
-/* Main Styles for Integral Visualizer */
+/* Estilos Principais para o Visualizador de Integrais */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -11,21 +11,50 @@ body {
     color: #333;
     background-color: #f8f9fa;
     padding: 20px;
+    height: 100vh;
+    overflow-x: hidden;
 }
 
 #app {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 20px;
+    height: calc(100vh - 40px);
 }
 
 h1 {
     text-align: center;
     margin-bottom: 20px;
     color: #2c3e50;
+    flex-shrink: 0;
+}
+
+/* Contentor principal - disposição lado a lado */
+.main-content {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+}
+
+/* Painel esquerdo para controlos */
+.controls-panel {
+    flex: 0 0 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+/* Painel direito para visualização e resultados */
+.visualization-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
 }
 
 h3 {
@@ -33,13 +62,13 @@ h3 {
     color: #2980b9;
 }
 
-/* Form Styling */
+/* Estilização do Formulário */
 #form-container {
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    margin-bottom: 20px;
+    flex-shrink: 0;
 }
 
 .integral-form {
@@ -95,11 +124,18 @@ h3 {
     margin-top: 10px;
 }
 
+.visual-options label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: normal;
+}
+
 button[type="submit"] {
     background-color: #2980b9;
     color: white;
     border: none;
-    padding: 10px 15px;
+    padding: 12px 20px;
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
@@ -116,7 +152,7 @@ small {
     font-size: 0.8em;
 }
 
-/* Example Buttons */
+/* Botões de Exemplo */
 #examples {
     margin: 20px 0;
 }
@@ -134,6 +170,7 @@ small {
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.2s;
+    font-size: 14px;
 }
 
 .example-btn:hover {
@@ -141,11 +178,13 @@ small {
     transform: translateY(-2px);
 }
 
-/* Results Styling */
+/* Estilização dos Resultados */
 #result-container {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    flex: 1;
+    min-height: 0;
 }
 
 #numerical-result {
@@ -153,6 +192,8 @@ small {
     padding: 15px;
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    display: none; /* Escondido por defeito */
 }
 
 .result-card h3 {
@@ -179,10 +220,10 @@ small {
     color: #c0392b;
 }
 
-/* Visualization Styling */
+/* Estilização da Visualização */
 #visualization {
-    width: 100%;
-    height: 500px;
+    flex: 1;
+    min-height: 500px;
     background-color: #fff;
     border-radius: 8px;
     overflow: hidden;
@@ -193,19 +234,51 @@ small {
     margin-top: 20px;
     font-size: 12px;
     color: #666;
+    flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
-    #result-container {
+/* Responsividade */
+@media (max-width: 1024px) {
+    .main-content {
         flex-direction: column;
+    }
+    
+    .controls-panel {
+        flex: 0 0 auto;
+        max-height: none;
+    }
+    
+    .visualization-panel {
+        flex: 1;
     }
     
     #visualization {
-        height: 400px;
+        min-height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
     }
     
-    .limits-inputs {
+    #app {
+        height: calc(100vh - 20px);
+    }
+    
+    .controls-panel {
+        flex: 0 0 auto;
+    }
+    
+    #visualization {
+        min-height: 300px;
+    }
+    
+    .example-buttons {
         flex-direction: column;
-        align-items: flex-start;
+    }
+    
+    .example-btn {
+        width: 100%;
     }
 }

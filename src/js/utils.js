@@ -1,10 +1,10 @@
 function parseMathExpression(expression) {
-    // A simple parser for mathematical expressions
+    // Um analisador simples para expressões matemáticas
     return new Function('x', 'y', 'z', `return ${expression};`);
 }
 
 function formatResult(result) {
-    return result.toFixed(4); // Format the result to four decimal places
+    return result.toFixed(4); // Formata o resultado para quatro casas decimais
 }
 
 function createGridPoints(xRange, yRange, zRange, step) {
@@ -19,26 +19,26 @@ function createGridPoints(xRange, yRange, zRange, step) {
     return points;
 }
 
-// Example test function: Sphere with radius 1 centered at the origin
+// Função de exemplo: Esfera com raio 1 centrada na origem
 function sphereExample() {
-    // Set up the form for a sphere example
+    // Configura o formulário para o exemplo da esfera
     const form = document.querySelector('form');
     if (!form) return;
     
-    // Set dimension to 3D (triple integral)
+    // Define dimensão para 3D (integral triplo)
     const dimensionSelect = form.querySelector('#dimension-select');
     if (dimensionSelect) {
         dimensionSelect.value = "3";
         dimensionSelect.dispatchEvent(new Event('change'));
     }
     
-    // Set function to the sphere equation: if x²+y²+z² ≤ 1 then 1, otherwise 0
+    // Define função para a equação da esfera: se x²+y²+z² ≤ 1 então 1, caso contrário 0
     const funcInput = form.querySelector('#function');
     if (funcInput) {
         funcInput.value = "(x*x + y*y + z*z <= 1) ? 1 : 0";
     }
     
-    // Set integration limits to contain the sphere
+    // Define limites de integração para conter a esfera
     if (form.querySelector('#xMin')) form.querySelector('#xMin').value = -1;
     if (form.querySelector('#xMax')) form.querySelector('#xMax').value = 1;
     if (form.querySelector('#yMin')) form.querySelector('#yMin').value = -1;
@@ -46,42 +46,108 @@ function sphereExample() {
     if (form.querySelector('#zMin')) form.querySelector('#zMin').value = -1;
     if (form.querySelector('#zMax')) form.querySelector('#zMax').value = 1;
     
-    // Increase resolution for better visualization
+    // Aumenta resolução para melhor visualização
     const resolutionInput = form.querySelector('#resolution');
     if (resolutionInput) {
         resolutionInput.value = 20;
     }
     
-    // Submit the form
+    // Submete o formulário
     form.dispatchEvent(new Event('submit'));
     
-    // Show expected result
-    console.log("Expected result (Volume of unit sphere): 4π/3 ≈ 4.18879");
+    // Mostra resultado esperado
+    console.log("Resultado esperado (Volume da esfera unitária): 4π/3 ≈ 4.18879");
 }
 
-// Add a test button to the page
+// Exemplo de cone
+function coneExample() {
+    const form = document.querySelector('form');
+    if (!form) return;
+    
+    const dimensionSelect = form.querySelector('#dimension-select');
+    if (dimensionSelect) {
+        dimensionSelect.value = "3";
+        dimensionSelect.dispatchEvent(new Event('change'));
+    }
+    
+    const funcInput = form.querySelector('#function');
+    if (funcInput) {
+        funcInput.value = "(x*x + y*y <= (1-z)*(1-z) && z >= 0 && z <= 1) ? 1 : 0";
+    }
+    
+    if (form.querySelector('#xMin')) form.querySelector('#xMin').value = -1;
+    if (form.querySelector('#xMax')) form.querySelector('#xMax').value = 1;
+    if (form.querySelector('#yMin')) form.querySelector('#yMin').value = -1;
+    if (form.querySelector('#yMax')) form.querySelector('#yMax').value = 1;
+    if (form.querySelector('#zMin')) form.querySelector('#zMin').value = 0;
+    if (form.querySelector('#zMax')) form.querySelector('#zMax').value = 1;
+    
+    form.dispatchEvent(new Event('submit'));
+    console.log("Resultado esperado (Volume do cone): π/3 ≈ 1.0472");
+}
+
+// Exemplo de cilindro
+function cylinderExample() {
+    const form = document.querySelector('form');
+    if (!form) return;
+    
+    const dimensionSelect = form.querySelector('#dimension-select');
+    if (dimensionSelect) {
+        dimensionSelect.value = "3";
+        dimensionSelect.dispatchEvent(new Event('change'));
+    }
+    
+    const funcInput = form.querySelector('#function');
+    if (funcInput) {
+        funcInput.value = "(x*x + y*y <= 1) ? 1 : 0";
+    }
+    
+    if (form.querySelector('#xMin')) form.querySelector('#xMin').value = -1;
+    if (form.querySelector('#xMax')) form.querySelector('#xMax').value = 1;
+    if (form.querySelector('#yMin')) form.querySelector('#yMin').value = -1;
+    if (form.querySelector('#yMax')) form.querySelector('#yMax').value = 1;
+    if (form.querySelector('#zMin')) form.querySelector('#zMin').value = 0;
+    if (form.querySelector('#zMax')) form.querySelector('#zMax').value = 2;
+    
+    form.dispatchEvent(new Event('submit'));
+    console.log("Resultado esperado (Volume do cilindro): 2π ≈ 6.2832");
+}
+
+// Adiciona botões de teste à página
 document.addEventListener('DOMContentLoaded', () => {
     const container = document.createElement('div');
     container.style.margin = '10px 0';
     
-    const button = document.createElement('button');
-    button.textContent = "Test: Unit Sphere Volume";
-    button.className = "example-btn";
-    button.onclick = sphereExample;
+    const sphereButton = document.createElement('button');
+    sphereButton.textContent = "Teste: Volume da Esfera Unitária";
+    sphereButton.className = "example-btn";
+    sphereButton.onclick = sphereExample;
     
-    container.appendChild(button);
+    const coneButton = document.createElement('button');
+    coneButton.textContent = "Teste: Volume do Cone";
+    coneButton.className = "example-btn";
+    coneButton.onclick = coneExample;
     
-    // Insert after the examples section
+    const cylinderButton = document.createElement('button');
+    cylinderButton.textContent = "Teste: Volume do Cilindro";
+    cylinderButton.className = "example-btn";
+    cylinderButton.onclick = cylinderExample;
+    
+    container.appendChild(sphereButton);
+    container.appendChild(coneButton);
+    container.appendChild(cylinderButton);
+    
+    // Insere após a secção de exemplos
     setTimeout(() => {
         const examplesDiv = document.getElementById('examples');
         if (examplesDiv) {
             examplesDiv.appendChild(container);
         } else {
-            // As fallback, insert after form
+            // Como alternativa, insere após o formulário
             const formContainer = document.getElementById('form-container');
             if (formContainer) {
                 formContainer.parentNode.insertBefore(container, formContainer.nextSibling);
             }
         }
-    }, 500); // Small delay to ensure examples are already created
+    }, 500); // Pequeno atraso para garantir que os exemplos já foram criados
 });
