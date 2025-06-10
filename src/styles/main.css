@@ -131,6 +131,51 @@ h3 {
     font-weight: normal;
 }
 
+.resolution-control {
+    grid-column: 1 / -1;
+    margin-top: 10px;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 5px 0;
+}
+
+.resolution-slider {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: #ddd;
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.resolution-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #2980b9;
+    cursor: pointer;
+}
+
+.resolution-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #2980b9;
+    cursor: pointer;
+    border: none;
+}
+
+.resolution-input {
+    width: 60px !important;
+    padding: 4px 8px !important;
+    text-align: center;
+}
+
 button[type="submit"] {
     background-color: #2980b9;
     color: white;

@@ -48,8 +48,12 @@ function sphereExample() {
     
     // Aumenta resolução para melhor visualização
     const resolutionInput = form.querySelector('#resolution');
+    const resolutionSlider = form.querySelector('#resolution-slider');
     if (resolutionInput) {
         resolutionInput.value = 20;
+    }
+    if (resolutionSlider) {
+        resolutionSlider.value = 20;
     }
     
     // Submete o formulário
@@ -82,6 +86,12 @@ function coneExample() {
     if (form.querySelector('#zMin')) form.querySelector('#zMin').value = 0;
     if (form.querySelector('#zMax')) form.querySelector('#zMax').value = 1;
     
+    // Set resolution
+    const resolutionInput = form.querySelector('#resolution');
+    const resolutionSlider = form.querySelector('#resolution-slider');
+    if (resolutionInput) resolutionInput.value = 15;
+    if (resolutionSlider) resolutionSlider.value = 15;
+    
     form.dispatchEvent(new Event('submit'));
     console.log("Resultado esperado (Volume do cone): π/3 ≈ 1.0472");
 }
@@ -109,45 +119,12 @@ function cylinderExample() {
     if (form.querySelector('#zMin')) form.querySelector('#zMin').value = 0;
     if (form.querySelector('#zMax')) form.querySelector('#zMax').value = 2;
     
+    // Set resolution
+    const resolutionInput = form.querySelector('#resolution');
+    const resolutionSlider = form.querySelector('#resolution-slider');
+    if (resolutionInput) resolutionInput.value = 15;
+    if (resolutionSlider) resolutionSlider.value = 15;
+    
     form.dispatchEvent(new Event('submit'));
     console.log("Resultado esperado (Volume do cilindro): 2π ≈ 6.2832");
 }
-
-// Adiciona botões de teste à página
-document.addEventListener('DOMContentLoaded', () => {
-    const container = document.createElement('div');
-    container.style.margin = '10px 0';
-    
-    const sphereButton = document.createElement('button');
-    sphereButton.textContent = "Teste: Volume da Esfera Unitária";
-    sphereButton.className = "example-btn";
-    sphereButton.onclick = sphereExample;
-    
-    const coneButton = document.createElement('button');
-    coneButton.textContent = "Teste: Volume do Cone";
-    coneButton.className = "example-btn";
-    coneButton.onclick = coneExample;
-    
-    const cylinderButton = document.createElement('button');
-    cylinderButton.textContent = "Teste: Volume do Cilindro";
-    cylinderButton.className = "example-btn";
-    cylinderButton.onclick = cylinderExample;
-    
-    container.appendChild(sphereButton);
-    container.appendChild(coneButton);
-    container.appendChild(cylinderButton);
-    
-    // Insere após a secção de exemplos
-    setTimeout(() => {
-        const examplesDiv = document.getElementById('examples');
-        if (examplesDiv) {
-            examplesDiv.appendChild(container);
-        } else {
-            // Como alternativa, insere após o formulário
-            const formContainer = document.getElementById('form-container');
-            if (formContainer) {
-                formContainer.parentNode.insertBefore(container, formContainer.nextSibling);
-            }
-        }
-    }, 500); // Pequeno atraso para garantir que os exemplos já foram criados
-});

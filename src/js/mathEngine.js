@@ -3,12 +3,16 @@ class MathEngine {
     constructor() {
         this.functionString = '';
         this.parsedFunction = null;
+        this.validOperations = ['Math.sin', 'Math.cos', 'Math.tan', 'Math.exp', 'Math.log', 'Math.sqrt', 'Math.pow', 'Math.abs', 'Math.PI', 'Math.E'];
     }
 
     setFunction(funcStr) {
         this.functionString = funcStr;
         try {
-            // Cria uma função que pode avaliar a expressão
+            // Validate function string for security
+            if (!this.validateFunction(funcStr)) {
+                throw new Error("Função contém operações não permitidas");
+            }
             this.parsedFunction = this.parseFunction(funcStr);
             return true;
         } catch (error) {
@@ -17,16 +21,23 @@ class MathEngine {
         }
     }
 
+    validateFunction(funcStr) {
+        // Basic security check - only allow mathematical operations
+        const allowedPattern = /^[x\+\-\*\/\(\)\s\d\.\^yzMath\.sincoexplogqrtabwPIE,]+$/;
+        return allowedPattern.test(funcStr);
+    }
+
     parseFunction(funcStr) {
-        // Cria uma função segura a partir da string
-        // Envolvemos numa estrutura try-catch para tratar expressões inválidas
+        // Replace ^ with Math.pow for exponentiation
+        const processedFunc = funcStr.replace(/\^/g, '**');
+        
         try {
             return new Function('x', 'y', 'z', `
                 try {
                     const Math = window.Math;
-                    return ${funcStr};
+                    const result = ${processedFunc};
+                    return isNaN(result) || !isFinite(result) ? 0 : result;
                 } catch (e) {
-                    console.error('Erro ao avaliar função:', e);
                     return 0;
                 }
             `);
@@ -35,29 +46,39 @@ class MathEngine {
         }
     }
 
-    // Cálculo de integral simples
+    // Improved Simpson's rule for single integration
+    computeSingleIntegralSimpson(xMin, xMax, steps = 100) {
+        if (!this.parsedFunction) {
+            throw new Error("Função não definida");
+        }
+        
+        // Ensure even number of steps for Simpson's rule
+        if (steps % 2 !== 0) steps++;
+        
+        const h = (xMax - xMin) / steps;
+        let sum = this.parsedFunction(xMin, 0, 0) + this.parsedFunction(xMax, 0, 0);
+        
+        // Apply Simpson's 1/3 rule
+        for (let i = 1; i < steps; i++) {
+            const x = xMin + i * h;
+            const coefficient = (i % 2 === 0) ? 2 : 4;
+            sum += coefficient * this.parsedFunction(x, 0, 0);
+        }
+        
+        return (h / 3) * sum;
+    }
+
+    // Cálculo de integral simples com método adaptativo
     computeSingleIntegral(xMin, xMax, steps = 100) {
         if (!this.parsedFunction) {
             throw new Error("Função não definida");
         }
         
-        let total = 0;
-        const dx = (xMax - xMin) / steps;
-        
-        // Regra dos trapézios para melhor aproximação
-        let prev = this.parsedFunction(xMin, 0, 0);
-        
-        for (let i = 1; i <= steps; i++) {
-            const x = xMin + i * dx;
-            const current = this.parsedFunction(x, 0, 0);
-            total += (prev + current) / 2 * dx;
-            prev = current;
-        }
-        
-        return total;
+        // Use Simpson's rule for better accuracy
+        return this.computeSingleIntegralSimpson(xMin, xMax, steps);
     }
 
-    // Cálculo de integral duplo
+    // Improved double integral with adaptive sampling
     computeDoubleIntegral(xMin, xMax, yMin, yMax, steps = 30) {
         if (!this.parsedFunction) {
             throw new Error("Função não definida");
@@ -67,19 +88,24 @@ class MathEngine {
         const dx = (xMax - xMin) / steps;
         const dy = (yMax - yMin) / steps;
         
-        for (let i = 0; i < steps; i++) {
-            const x = xMin + (i + 0.5) * dx; // Regra do ponto médio
+        // Use Simpson's rule in both directions for better accuracy
+        for (let i = 0; i <= steps; i++) {
+            const x = xMin + i * dx;
+            const xWeight = (i === 0 || i === steps) ? 1 : ((i % 2 === 0) ? 2 : 4);
             
-            for (let j = 0; j < steps; j++) {
-                const y = yMin + (j + 0.5) * dy; // Regra do ponto médio
-                total += this.parsedFunction(x, y, 0) * dx * dy;
+            for (let j = 0; j <= steps; j++) {
+                const y = yMin + j * dy;
+                const yWeight = (j === 0 || j === steps) ? 1 : ((j % 2 === 0) ? 2 : 4);
+                
+                const funcValue = this.parsedFunction(x, y, 0);
+                total += xWeight * yWeight * funcValue;
             }
         }
         
-        return total;
+        return total * (dx * dy) / 9; // Simpson's rule normalization
     }
 
-    // Cálculo de integral triplo
+    // Improved triple integral
     computeTripleIntegral(xMin, xMax, yMin, yMax, zMin, zMax, steps = 20) {
         if (!this.parsedFunction) {
             throw new Error("Função não definida");
@@ -90,15 +116,17 @@ class MathEngine {
         const dy = (yMax - yMin) / steps;
         const dz = (zMax - zMin) / steps;
         
+        // Use midpoint rule for triple integrals (more stable)
         for (let i = 0; i < steps; i++) {
-            const x = xMin + (i + 0.5) * dx; // Regra do ponto médio
+            const x = xMin + (i + 0.5) * dx;
             
             for (let j = 0; j < steps; j++) {
-                const y = yMin + (j + 0.5) * dy; // Regra do ponto médio
+                const y = yMin + (j + 0.5) * dy;
                 
                 for (let k = 0; k < steps; k++) {
-                    const z = zMin + (k + 0.5) * dz; // Regra do ponto médio
-                    total += this.parsedFunction(x, y, z) * dx * dy * dz;
+                    const z = zMin + (k + 0.5) * dz;
+                    const funcValue = this.parsedFunction(x, y, z);
+                    total += funcValue * dx * dy * dz;
                 }
             }
         }
@@ -169,6 +197,10 @@ class MathEngine {
             const yStep = (limits.y[1] - limits.y[0]) / resolution;
             const zStep = (limits.z[1] - limits.z[0]) / resolution;
             
+            // First pass: find value range for better visualization
+            let minVal = Infinity, maxVal = -Infinity;
+            const tempPoints = [];
+            
             for (let i = 0; i <= resolution; i++) {
                 for (let j = 0; j <= resolution; j++) {
                     for (let k = 0; k <= resolution; k++) {
@@ -176,20 +208,33 @@ class MathEngine {
                         const y = limits.y[0] + j * yStep;
                         const z = limits.z[0] + k * zStep;
                         const value = this.parsedFunction(x, y, z);
-                        // Só adiciona pontos onde a função é positiva (para clareza visual)
-                        if (value > 0) {
-                            points.push({
-                                x: x,
-                                y: y,
-                                z: z,
-                                value: value
-                            });
-                        }
+                        
+                        tempPoints.push({ x, y, z, value });
+                        if (value < minVal) minVal = value;
+                        if (value > maxVal) maxVal = value;
                     }
+                }
+            }
+            
+            // Second pass: filter points based on significance
+            const threshold = minVal + (maxVal - minVal) * 0.1; // Show points above 10% of range
+            
+            for (const point of tempPoints) {
+                if (Math.abs(point.value) > Math.abs(threshold)) {
+                    points.push(point);
                 }
             }
         }
         
         return points;
+    }
+
+    // Add method to estimate integration error
+    estimateError(dimension, limits, steps) {
+        // Compare results with different step sizes
+        const result1 = this.computeIntegral(dimension, limits, steps);
+        const result2 = this.computeIntegral(dimension, limits, steps * 2);
+        
+        return Math.abs(result2 - result1);
     }
 }

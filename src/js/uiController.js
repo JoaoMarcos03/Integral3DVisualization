@@ -28,12 +28,13 @@ class UIController {
         }
         
         try {
-            // Calcula o resultado numérico
-            const steps = visualOptions.resolution * 5; // Usa resolução mais elevada para cálculo
+            // Calcula o resultado numérico com diferentes resoluções para estimativa de erro
+            const steps = visualOptions.resolution * 5;
             const result = this.mathEngine.computeIntegral(dimension, limits, steps);
+            const errorEstimate = this.mathEngine.estimateError(dimension, limits, steps);
             
-            // Apresenta o resultado
-            this.displayResult(funcText, dimension, limits, result);
+            // Apresenta o resultado com estimativa de erro
+            this.displayResult(funcText, dimension, limits, result, errorEstimate);
             
             // Gera pontos para visualização
             const points = this.mathEngine.generateSamplePoints(dimension, limits, visualOptions.resolution);
@@ -43,7 +44,8 @@ class UIController {
                 points,
                 dimension,
                 limits,
-                showBounds: visualOptions.showBounds
+                showBounds: visualOptions.showBounds,
+                showPoints: visualOptions.showPoints
             });
         } catch (error) {
             console.error('Erro de cálculo:', error);
@@ -51,7 +53,7 @@ class UIController {
         }
     }
     
-    displayResult(funcText, dimension, limits, result) {
+    displayResult(funcText, dimension, limits, result, errorEstimate) {
         let limitText = '';
         
         if (dimension >= 1) {
@@ -69,15 +71,22 @@ class UIController {
         const dimensionSymbol = dimension === 1 ? '∫' : (dimension === 2 ? '∬' : '∭');
         const integralType = dimension === 1 ? 'dx' : (dimension === 2 ? 'dA' : 'dV');
         
+        // Format result with appropriate precision
+        const precision = Math.max(3, Math.ceil(-Math.log10(Math.abs(result) + 1e-10)) + 2);
+        const formattedResult = result.toFixed(Math.min(precision, 8));
+        
         this.resultElement.innerHTML = `
             <div class="result-card">
                 <h3>Resultado do Integral</h3>
                 <div class="math-expression">
-                    ${dimensionSymbol} ${funcText} ${integralType} = <strong>${result.toFixed(6)}</strong>
+                    ${dimensionSymbol} ${funcText} ${integralType} = <strong>${formattedResult}</strong>
                 </div>
                 <div class="limits">
                     onde ${limitText}
                 </div>
+                ${errorEstimate ? `<div class="error-estimate">
+                    <small>Estimativa de erro: ±${errorEstimate.toExponential(2)}</small>
+                </div>` : ''}
             </div>
         `;
         

@@ -53,11 +53,16 @@ class InputForm {
                 </label>
                 <label>
                     <input type="checkbox" id="show-points" checked>
-                    Mostrar Pontos de Amostra
+                    Mostrar Pontos de Amostra (3D)
                 </label>
-                <label>
-                    Resolução: <input type="number" id="resolution" value="10" min="5" max="50">
-                </label>
+                <div class="resolution-control">
+                    <label for="resolution">Resolução:</label>
+                    <div class="slider-container">
+                        <input type="range" id="resolution-slider" min="5" max="50" value="10" class="resolution-slider">
+                        <input type="number" id="resolution" min="5" max="50" value="10" class="resolution-input">
+                    </div>
+                    <small>Maior resolução = mais pontos de cálculo (mais lento)</small>
+                </div>
             </div>
         `;
         this.form.appendChild(visualDiv);
@@ -74,6 +79,20 @@ class InputForm {
         dimensionSelect.addEventListener('change', (e) => {
             this.dimension = parseInt(e.target.value);
             this.updateLimitsInputs();
+        });
+
+        // Sync resolution slider and input
+        const resolutionSlider = this.form.querySelector('#resolution-slider');
+        const resolutionInput = this.form.querySelector('#resolution');
+        
+        resolutionSlider.addEventListener('input', (e) => {
+            resolutionInput.value = e.target.value;
+        });
+        
+        resolutionInput.addEventListener('input', (e) => {
+            const value = Math.max(5, Math.min(50, parseInt(e.target.value) || 10));
+            e.target.value = value;
+            resolutionSlider.value = value;
         });
         
         // Configuração inicial dos campos de limites
