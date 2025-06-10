@@ -22,14 +22,62 @@ class MathEngine {
     }
 
     validateFunction(funcStr) {
-        // Basic security check - only allow mathematical operations
-        const allowedPattern = /^[x\+\-\*\/\(\)\s\d\.\^yzMath\.sincoexplogqrtabwPIE,]+$/;
+        // Enhanced security check - allow more natural mathematical expressions
+        const allowedPattern = /^[x\+\-\*\/\(\)\s\d\.\^yzMath\.sincotanexplogqrtabwPIE,<>=!?:]+$/;
         return allowedPattern.test(funcStr);
     }
 
     parseFunction(funcStr) {
-        // Replace ^ with Math.pow for exponentiation
-        const processedFunc = funcStr.replace(/\^/g, '**');
+        // Enhanced function processing for better user experience
+        let processedFunc = funcStr;
+        
+        // Replace common mathematical functions with Math. prefix
+        const mathFunctions = {
+            'sin': 'Math.sin',
+            'cos': 'Math.cos',
+            'tan': 'Math.tan',
+            'exp': 'Math.exp',
+            'log': 'Math.log',
+            'ln': 'Math.log',
+            'sqrt': 'Math.sqrt',
+            'abs': 'Math.abs',
+            'floor': 'Math.floor',
+            'ceil': 'Math.ceil',
+            'round': 'Math.round',
+            'pow': 'Math.pow',
+            'min': 'Math.min',
+            'max': 'Math.max'
+        };
+        
+        // Replace mathematical constants
+        const mathConstants = {
+            'pi': 'Math.PI',
+            'PI': 'Math.PI',
+            'e': 'Math.E',
+            'E': 'Math.E'
+        };
+        
+        // Apply function replacements (avoid replacing if already has Math. prefix)
+        for (const [shortName, fullName] of Object.entries(mathFunctions)) {
+            const regex = new RegExp(`\\b${shortName}\\b(?!\\.)`, 'g');
+            processedFunc = processedFunc.replace(regex, fullName);
+        }
+        
+        // Apply constant replacements
+        for (const [shortName, fullName] of Object.entries(mathConstants)) {
+            const regex = new RegExp(`\\b${shortName}\\b(?!\\.)`, 'g');
+            processedFunc = processedFunc.replace(regex, fullName);
+        }
+        
+        // Replace ^ with ** for exponentiation
+        processedFunc = processedFunc.replace(/\^/g, '**');
+        
+        // Handle implicit multiplication (e.g., 2x -> 2*x, xy -> x*y)
+        processedFunc = processedFunc.replace(/(\d)([xyz])/g, '$1*$2');
+        processedFunc = processedFunc.replace(/([xyz])([xyz])/g, '$1*$2');
+        processedFunc = processedFunc.replace(/([xyz])(\d)/g, '$1*$2');
+        processedFunc = processedFunc.replace(/\)([xyz])/g, ')*$1');
+        processedFunc = processedFunc.replace(/([xyz])\(/g, '$1*(');
         
         try {
             return new Function('x', 'y', 'z', `

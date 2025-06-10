@@ -31,8 +31,33 @@ class InputForm {
         functionDiv.classList.add('form-group');
         functionDiv.innerHTML = `
             <label for="function">Função a Integrar:</label>
-            <input type="text" id="function" name="function" placeholder="ex: x*y*z ou Math.sin(x)" required>
-            <small>Use x, y, z como variáveis. Funções Math disponíveis (Math.sin, Math.exp, etc.)</small>
+            <input type="text" id="function" name="function" placeholder="ex: x*y*z, sin(x), exp(-x^2)" required>
+            <div class="function-hints">
+                <div class="hint-section">
+                    <strong>Funções disponíveis:</strong>
+                    <div class="function-list">
+                        <span class="function-item">sin, cos, tan</span>
+                        <span class="function-item">exp, log, ln</span>
+                        <span class="function-item">sqrt, abs</span>
+                        <span class="function-item">floor, ceil, round</span>
+                        <span class="function-item">pow(base, exp)</span>
+                        <span class="function-item">min, max</span>
+                    </div>
+                </div>
+                <div class="hint-section">
+                    <strong>Constantes:</strong>
+                    <span class="function-item">pi, e</span>
+                </div>
+                <div class="hint-section">
+                    <strong>Operadores:</strong>
+                    <span class="function-item">+, -, *, /, ^</span>
+                    <span class="function-item">==, !=, <, >, <=, >=</span>
+                    <span class="function-item">? : (ternário)</span>
+                </div>
+            </div>
+            <div class="function-preview" id="function-preview" style="display: none;">
+                <strong>Interpretação:</strong> <span id="preview-text"></span>
+            </div>
         `;
         this.form.appendChild(functionDiv);
         
@@ -197,6 +222,115 @@ class InputForm {
                 limits,
                 visualization
             });
+        }
+    }
+    
+    addQuickInsertButtons(functionDiv) {
+        const quickInsertDiv = document.createElement('div');
+        quickInsertDiv.classList.add('quick-insert');
+        quickInsertDiv.innerHTML = `
+            <label>Inserção Rápida:</label>
+            <div class="quick-buttons">
+                <button type="button" class="quick-btn" data-insert="sin(x)">sin(x)</button>
+                <button type="button" class="quick-btn" data-insert="cos(x)">cos(x)</button>
+                <button type="button" class="quick-btn" data-insert="exp(x)">exp(x)</button>
+                <button type="button" class="quick-btn" data-insert="x^2">x²</button>
+                <button type="button" class="quick-btn" data-insert="sqrt(x)">√x</button>
+                <button type="button" class="quick-btn" data-insert="abs(x)">|x|</button>
+                <button type="button" class="quick-btn" data-insert="log(x)">ln(x)</button>
+                <button type="button" class="quick-btn" data-insert="pi">π</button>
+                <button type="button" class="quick-btn" data-insert="e">e</button>
+                <button type="button" class="quick-btn" data-insert="(x^2 + y^2 <= 1) ? 1 : 0">Círculo</button>
+            </div>
+        `;
+        
+        functionDiv.appendChild(quickInsertDiv);
+        
+        // Add event listeners for quick insert buttons
+        const quickButtons = quickInsertDiv.querySelectorAll('.quick-btn');
+        const functionInput = this.form.querySelector('#function');
+        
+        quickButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const insertText = button.dataset.insert;
+                const cursorPos = functionInput.selectionStart;
+                const currentValue = functionInput.value;
+                
+                // Insert text at cursor position
+                const newValue = currentValue.slice(0, cursorPos) + insertText + currentValue.slice(cursorPos);
+                functionInput.value = newValue;
+                
+                // Update cursor position
+                const newCursorPos = cursorPos + insertText.length;
+                functionInput.setSelectionRange(newCursorPos, newCursorPos);
+                
+                // Trigger input event to update preview
+                functionInput.dispatchEvent(new Event('input'));
+                functionInput.focus();
+            });
+        });
+    }
+
+    updateFunctionPreview(functionText, previewDiv, previewText) {
+        if (!functionText.trim()) {
+            previewDiv.style.display = 'none';
+            return;
+        }
+        
+        try {
+            // Simulate the same processing as in mathEngine
+            let processedFunc = functionText;
+            
+            // Replace common mathematical functions
+            const mathFunctions = {
+                'sin': 'Math.sin',
+                'cos': 'Math.cos',
+                'tan': 'Math.tan',
+                'exp': 'Math.exp',
+                'log': 'Math.log',
+                'ln': 'Math.log',
+                'sqrt': 'Math.sqrt',
+                'abs': 'Math.abs',
+                'floor': 'Math.floor',
+                'ceil': 'Math.ceil',
+                'round': 'Math.round',
+                'pow': 'Math.pow',
+                'min': 'Math.min',
+                'max': 'Math.max'
+            };
+            
+            const mathConstants = {
+                'pi': 'Math.PI',
+                'PI': 'Math.PI',
+                'e': 'Math.E',
+                'E': 'Math.E'
+            };
+            
+            // Apply replacements
+            for (const [shortName, fullName] of Object.entries(mathFunctions)) {
+                const regex = new RegExp(`\\b${shortName}\\b(?!\\.)`, 'g');
+                processedFunc = processedFunc.replace(regex, fullName);
+            }
+            
+            for (const [shortName, fullName] of Object.entries(mathConstants)) {
+                const regex = new RegExp(`\\b${shortName}\\b(?!\\.)`, 'g');
+                processedFunc = processedFunc.replace(regex, fullName);
+            }
+            
+            processedFunc = processedFunc.replace(/\^/g, '**');
+            
+            // Handle implicit multiplication
+            processedFunc = processedFunc.replace(/(\d)([xyz])/g, '$1*$2');
+            processedFunc = processedFunc.replace(/([xyz])([xyz])/g, '$1*$2');
+            processedFunc = processedFunc.replace(/([xyz])(\d)/g, '$1*$2');
+            
+            previewText.textContent = processedFunc;
+            previewDiv.style.display = 'block';
+            previewDiv.className = 'function-preview valid';
+        } catch (error) {
+            previewText.textContent = 'Erro na função';
+            previewDiv.style.display = 'block';
+            previewDiv.className = 'function-preview invalid';
         }
     }
 }
